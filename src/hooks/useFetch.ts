@@ -12,14 +12,18 @@ interface Params<T>{
     const [loading,setLoading]=useState(true)
     const [error,setError]=useState<ErrorType>(null)
     useEffect(()=>{
+        const controller=new AbortController()
+        setLoading(true)
         const fetchData=async ()=>{
+            
              try {
-                    const response=await fetch(url)
+                    const response=await fetch(url,controller)
                     if (!response.ok){
                         throw new Error('Error al obtener los datos')
                     }
                     const jsonData:T=await response.json()
                     setData(jsonData)
+                    setError(null)
                 } catch (err) {
                     setError(err as Error)
                 }
@@ -28,7 +32,9 @@ interface Params<T>{
                 }
         }
         fetchData()
-
+        return ()=>{
+            controller.abort()
+        }
         
     },[url])
     return{
